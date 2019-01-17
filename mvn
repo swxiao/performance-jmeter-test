@@ -1,0 +1,4 @@
+##私服库地址http://172.16.200.160:8081/nexus/content/groups/public/
+##环境配置好之后运行maven命令
+mvn clean package -Dmaven.test.skip=true
+## 将target内**with-dependencies.jar复制到jmeter的lib/ext下即可进行相关测试操作
