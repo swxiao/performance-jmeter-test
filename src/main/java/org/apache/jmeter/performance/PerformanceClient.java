@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.performance.result.HandlerResult;
 import org.apache.jmeter.performance.task.Execution;
 import org.apache.jmeter.performance.util.ClassUtil;
@@ -38,6 +39,13 @@ public class PerformanceClient extends AbstractJavaSamplerClient implements Seri
 		return "PerformanceClient" + Thread.currentThread().getId();
 	}
 
+	@Override
+	public Arguments getDefaultParameters() {
+		Arguments arguments = new Arguments();
+		arguments.addArgument("task", "");
+		return arguments;
+	}
+
 	public SampleResult runTest(JavaSamplerContext context) {
 		try {
 			result.sampleStart();
@@ -48,7 +56,13 @@ public class PerformanceClient extends AbstractJavaSamplerClient implements Seri
 				return result;
 			}
 			Execution execution = taskMap.get(task);
-			HandlerResult handler = execution.exec(context);
+			if (execution == null) {
+				result.setResponseCode("ERROR");
+				result.setResponseMessage("task [" + task + "] not match.");
+			}
+			execution.before(context, result);
+			HandlerResult handler = execution.exec(context, result);
+			execution.after(context, result);
 			if (handler.isSuccess()) {
 				result.setSuccessful(true);
 			} else {

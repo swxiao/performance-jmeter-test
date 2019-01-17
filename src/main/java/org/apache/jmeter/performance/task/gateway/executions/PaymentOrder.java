@@ -9,7 +9,9 @@ import org.apache.jmeter.performance.result.HandlerResult;
 import org.apache.jmeter.performance.task.gateway.AbstractGatewayExecution;
 import org.apache.jmeter.performance.util.HttpUtil;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
+import org.apache.jmeter.samplers.SampleResult;
 
+import com.mchange.v2.codegen.bean.BeangenUtils;
 import com.zitopay.datagram.request.RequestDatagram;
 
 /**
@@ -40,7 +42,17 @@ public class PaymentOrder extends AbstractGatewayExecution {
 		return context.getParameter("hardware_key");
 	}
 
-	public HandlerResult exec(JavaSamplerContext context) throws Exception {
+	@Override
+	public void before(JavaSamplerContext context, SampleResult result) throws Exception {
+		System.out.println("start .....................................");
+	}
+
+	@Override
+	public void after(JavaSamplerContext context, SampleResult result) throws Exception {
+		System.out.println("end .....................................");
+	}
+
+	public HandlerResult exec(JavaSamplerContext context, SampleResult result) throws Exception {
 		String url = context.getParameter("url");
 		this.context = context;
 		HandlerResult handler = new HandlerResult();
@@ -53,8 +65,10 @@ public class PaymentOrder extends AbstractGatewayExecution {
 		order.setOrder_title(order.getMer_order_id());
 		order.setBar_code(order.getMer_order_id());
 		rd.setData(order);
+		System.out.println("request data :" + rd);
 		String request = rd.encryptDESString(getPaymentKey());
 		String response = HttpUtil.sendPost(url, request);
+		System.out.println("response data :" + response);
 		if (StringUtils.isEmpty(response)) {
 			handler.setSuccess(false);
 		} else {
